@@ -5,7 +5,7 @@ AI Battle Arena is a Python-based simulation platform where AI contestants, powe
 ## Features
 
 - Run simulated battles between AI contestants using Google Gemini
-- Modular contestant system for easy addition of new AI agents (eventually)
+- Modular contestant system for easy addition of new AI agents
 - Configurable battle rounds and rules
 - Command-line interface for running and observing battles
 
@@ -24,8 +24,16 @@ AI Battle Arena is a Python-based simulation platform where AI contestants, powe
    ```sh
    pip install -r requirements.txt
    ```
-3. **Set up your `.env` file** with the required API key.
-   - A free Google AI Studio Gemini API key can be generated here: https://aistudio.google.com/apikey
+3. **Set up your `.env` file** with the required API key(s):
+   - For Google Gemini, add the following line to your `.env` file:
+     ```
+     GEMINI_API_KEY="your-gemini-api-key-here"
+     ```
+   > A free Google AI Studio Gemini API key can be generated here: https://aistudio.google.com/apikey
+   - *(Optional)* For OpenRouter (currently unsupported), you would use:
+     ```
+     OPENROUTER_API_KEY="your-openrouter-api-key-here"
+     ```
 4. **Run the main program:**
    ```sh
    python main.py
@@ -34,10 +42,11 @@ AI Battle Arena is a Python-based simulation platform where AI contestants, powe
 ## Project Structure
 
 - `main.py` — Entry point, runs the battle arena simulation
-- `roster.py` — Defines battler classes, contestant models, and parsing logic
+- `llm_managers/` — LLM interaction managers (e.g., `gemini_manager.py`)
+- `models.py` — Contestant and battler models, response schemas, and parsing logic
+- `battler_class.py` — Enum and logic for battler classes, descriptions, and actions
+- `roster.py` — Roster creation and contestant management
 - `battle_round.py` — Handles the logic for each round of the battle
-- `gemini_conversation_manager.py` — Manages Google Gemini LLM interactions
-- `openrouter_conversation_manager.py` — Manages OpenRouter LLM interactions (**DO NOT USE**)
 - `prompts.py` — Contains prompt templates for LLMs
 - `utils.py` — Utility functions for printing and formatting
 - `requirements.txt` — Python dependencies
