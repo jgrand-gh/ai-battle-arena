@@ -7,6 +7,12 @@ from rich.text import Text
 DELAY_PER_WORD = 0.12 # default: 0.24, lowered for testing purposes
 
 class ColorList(Enum):
+    RED = "red"
+    GREEN = "green"
+    YELLOW = "yellow"
+    BLUE = "blue"
+    MAGENTA = "magenta"
+    CYAN = "cyan"
     BRIGHT_RED = "bright_red"
     BRIGHT_GREEN = "bright_green"
     BRIGHT_YELLOW = "bright_yellow"
