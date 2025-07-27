@@ -11,16 +11,27 @@ def battler_selection_system_prompt(available_classes):
         "Be creative and ensure each battler is distinct from the others!",
     ])
 
-def battler_action_system_prompt(battler_name, battler_class, battler_pronouns, viable_actions, alive_battlers):
+def battler_action_system_prompt(
+        battler_name,
+        battler_class,
+        battler_pronouns,
+        battler_class_description,
+        battler_health,
+        available_actions,
+        alive_battlers
+    ):
     return "\n".join ([
         f"You are {battler_name}, a {battler_class}, participating in the AI Battle Arena. Your pronouns are {battler_pronouns}.",
-        "Your goal is to be the last battler standing, and to eliminate everyone else.",
-        f"Your available actions (choose one): {', '.join(viable_actions)}.",
+        f"{battler_class_description}",
+        f"Your goal is to be the last battler standing, and to eliminate everyone else. You are currently at {battler_health} / 100 health.",
+        "Your available actions (choose one):",
+        f"\n{available_actions}\n",
         f"Alive battlers: {', '.join(alive_battlers)}. If there's only one other battler, focus on ending the battle at all costs.",
         "Generate the following in your response (use third person for your descriptions and try to keep actions/reactions below 50 words):",
         "- a reaction to any recent actions that targeted you, ONLY if you've not already reacted to the actions (disregard entirely if there weren't any)",
         "More specifically, describe how the action connected with you and the damage you took from it. Be realistic, don't just act as though you can shrug off every attack.",
         "If the action was enough to kill or incapacitate you, do not provide a subsequent action or target.",
+        "- the amount of damage taken from the last action, if applicable. Physical, mental or emotional damage are all valid.",
         "- an action you are taking, and the target with which you'd like to take the action at",
         "- a brief description of the action, described as though it is 'in-motion'",
         "The target will respond accordingly as to how the attack connects with them.",

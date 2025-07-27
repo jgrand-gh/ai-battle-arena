@@ -1,39 +1,22 @@
-import random
-
-from typing import Tuple
 from utils import print_with_delay, staggered_print_with_delay
 from prompts import battler_action_system_prompt
-from roster import Battler, BattleActionResponse, parse_battle_action_response
+from roster import Battler, BattleActionResponse, parse_battle_action_response, CharacterClass
 from gemini_conversation_manager import generate_response_with_fallback
 
 class BattleRound():
-    def __init__(self, round_number, battle_roster, battle_history):
+    def __init__(self, round_number, battle_roster, battle_history, turn_order):
         self.round_number = round_number
         self.battle_roster = battle_roster
         self.battle_history = battle_history
-        self.turn_order = {}
+        self.turn_order = turn_order
         self.alive_battlers = self.get_alive_battlers()
 
     def get_alive_battlers(self):
         return [b for b in self.battle_roster if not b.is_defeated]
 
-    def get_available_actions(self):
-        return ["Attack", "Devastating Attack (Leaves you vulnerable)", "Special Ability"]
-
-    def determine_turn_order(self):
-        self.turn_order = {}
-        self.alive_battlers = self.get_alive_battlers()
-        num_battlers = len(self.alive_battlers)
-        rolls = random.sample(range(0, 101), num_battlers)
-
-        for battler in self.alive_battlers:
-            self.turn_order[rolls.pop()] = battler
-
     def initiate_battle_round(self):
-        self.determine_turn_order()
-
-        ordered: list[Tuple[int, Battler]] = sorted(self.turn_order.items(), reverse=True)
-        print_with_delay(f"This round's turn order: {[b.get_formatted_name_and_class_string() for _, b in ordered]}")
+        ordered: list[tuple[int, Battler]] = sorted(self.turn_order.items(), reverse=True)
+        print_with_delay(f"Turn order: {[b.get_formatted_name_and_class_string() for _, b in ordered if not b.is_defeated]}")
 
         for _, battler in ordered:
             if battler.is_defeated:
@@ -48,7 +31,9 @@ class BattleRound():
                 battler_name=battler.first_name,
                 battler_class=battler.character_class.value,
                 battler_pronouns=battler.pronouns,
-                viable_actions=self.get_available_actions(),
+                battler_class_description= battler.get_class_specific_description(),
+                battler_health=battler.current_health,
+                available_actions=battler.get_available_actions(),
                 alive_battlers=other_alive_battlers
             )
             
@@ -63,6 +48,8 @@ class BattleRound():
                 )
                 
                 battle_action = parse_battle_action_response(response.text)
+
+                battler.current_health -= battle_action.damage_taken
                 
                 print_with_delay(f"\n{battler.get_formatted_name_and_class_string()}'s turn:")
                 
