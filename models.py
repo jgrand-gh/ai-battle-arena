@@ -35,9 +35,32 @@ class ContestantSchema(BaseModel):
         staggered_print_with_delay(f"{self.intro_taunt}")
 
 class Battler(ContestantSchema):
+    MAX_HP: int = 100
     current_health: int = 100
     is_defeated: bool = False
     can_use_special: bool = True
+    ongoing_status_conditions: list[str] = []
+
+    def get_formatted_name_and_health(self) -> str:
+        # returns in this format: "name (HP: [green]80[/green] / 100)"
+        if self.current_health > 90:
+            health_color = ColorList.BRIGHT_GREEN.value
+        elif self.current_health > 70:
+            health_color = ColorList.GREEN.value
+        elif self.current_health > 50:
+            health_color = ColorList.BRIGHT_YELLOW.value
+        elif self.current_health > 25:
+            health_color = ColorList.YELLOW.value
+        elif self.current_health > 0:
+            health_color = ColorList.BRIGHT_RED.value
+        else:
+            health_color = ColorList.RED.value
+
+        return f"{self.get_formatted_name()} (HP: [{health_color}]{self.current_health}[/{health_color}] / {self.MAX_HP})"
+    
+    def get_health_values(self) -> str:
+        # returns in this format: "80 / 100"
+        return f"{self.current_health} / {self.MAX_HP}"
 
     def take_damage(self, damage: int) -> None:
         self.current_health = max(0, self.current_health - damage)
@@ -55,7 +78,7 @@ class Battler(ContestantSchema):
 
         return (
             f"- Your standard attack ability is {actions['Attack']}.\n"
-            f"- Your devastating attack ability is {actions['Devastating Attack']}. This action will leave you vulnerable.\n"
+            f"- Your devastating attack ability is {actions['Devastating Attack']}. This action will make you Vulnerable.\n"
             f"- Your special ability is {actions['Special Ability']}. You can only do this once."
         )
 
@@ -65,11 +88,12 @@ class RosterResponse(BaseModel):
 class BattleTurnResponse(BaseModel):
     reaction: Optional[str] = ""
     damage_taken: int = 0
-    action: Optional[str] = ""
-    target: Optional[str] = ""
+    action: Optional[str] = "nothing"
+    target: Optional[str] = "nobody"
     action_description: str
     verbal_response: str
     special_ability_used: bool = False
+    ongoing_status_conditions: list[str] = []
 
 def parse_roster_response(json_str: str) -> list[ContestantSchema]:
     try:

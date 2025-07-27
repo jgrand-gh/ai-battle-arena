@@ -45,7 +45,7 @@ class BattlerClass(Enum):
             self.BERSERKER: {
                 "Attack": "Axe Cleave",
                 "Devastating Attack": "Reckless Charge",
-                "Special Ability": "Piercing Roar (can hit multiple targets)"
+                "Special Ability": "Piercing Roar (hits all targets by name)"
             },
             self.MONK: {
                 "Attack": "Brutal Palm",

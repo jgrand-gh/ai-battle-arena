@@ -1,7 +1,9 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import sys
 import random
 
-from dotenv import load_dotenv
 from rich import print
 
 from battle_round import BattleRound
@@ -12,7 +14,6 @@ from prompts import contestant_selection_prompt
 from utils import print_with_delay
 
 def main() -> None:
-    load_dotenv()
     show_arena_introduction()
 
     try:
@@ -46,8 +47,8 @@ def create_roster() -> list[ContestantSchema]:
 
 def battle_loop(roster: list[ContestantSchema]) -> None:
     battler_roster = [Battler(**contestant.model_dump()) for contestant in roster]
+    random.shuffle(battler_roster) # randomize turn order once; had done random order every turn before but that led to too many double-turns
 
-    turn_order = determine_turn_order(battler_roster)
     round_number = 1
     battle_history = []
 
@@ -65,10 +66,6 @@ def battle_loop(roster: list[ContestantSchema]) -> None:
         print_with_delay(f"\n{winner.get_formatted_name_and_class()} [bold green]is the victor![/bold green]")
     else:
         print_with_delay("\n[bold red]It... it's a draw!? How did this happen?[/bold red]")
-
-def determine_turn_order(battler_roster: list[Battler]) -> list[Battler]:
-    random.shuffle(battler_roster)
-    return battler_roster
 
 if __name__ == "__main__":
     main()
