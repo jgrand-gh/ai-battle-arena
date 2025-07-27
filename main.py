@@ -1,3 +1,5 @@
+import random
+
 from rich import print
 from dotenv import load_dotenv
 
@@ -26,9 +28,20 @@ def create_battle_roster() -> list:
     
     return parse_roster(response.text)
 
+def determine_turn_order(roster):
+    num_battlers = len(roster)
+    rolls = random.sample(range(0, 101), num_battlers)
+    turn_order = {}
+    for battler in roster:
+        turn_order[rolls.pop()] = battler
+
+    return turn_order
+
 def battle_loop(roster):
     # cast to ArenaContestant roster to Battlers
     battle_roster = [Battler(**c.model_dump()) for c in roster]
+
+    turn_order = determine_turn_order(battle_roster)
 
     round_number = 1
     battle_history = []
@@ -39,7 +52,7 @@ def battle_loop(roster):
             break
 
         print_with_delay(f"\n[bold yellow]--- ROUND {round_number} ---[/bold yellow]")
-        round_instance = BattleRound(round_number, battle_roster, battle_history)
+        round_instance = BattleRound(round_number, battle_roster, battle_history, turn_order)
         round_instance.initiate_battle_round()
         round_number += 1
 
@@ -59,11 +72,11 @@ def main():
 
         for battler in roster:
             battler.display_introduction()
-
-        battle_loop(roster)
     except Exception as e:
         print(f"Battle setup failed: {e}")
         raise
+
+    battle_loop(roster)
 
 if __name__ == "__main__":
     main()

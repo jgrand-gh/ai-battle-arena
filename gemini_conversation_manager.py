@@ -3,8 +3,9 @@ import os
 from google import genai
 from google.genai import types
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-client = genai.Client()
+client = genai.Client(
+    api_key=os.getenv("GOOGLE_API_KEY"),
+)
 
 def generate_response_with_fallback(prompt, system_prompt=None, response_schema=None, is_streamed=False):
     models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"]
@@ -16,11 +17,13 @@ def generate_response_with_fallback(prompt, system_prompt=None, response_schema=
                 prompt=prompt,
                 model=model,
                 system_prompt=system_prompt,
-                response_schema=response_schema)
+                response_schema=response_schema,
+            )
             return response
         except Exception as e:
             print(f"Model {model} failed: {e}")
             continue
+    raise RuntimeError("All models failed to generate a response.")
 
 def generate_response(prompt, model, system_prompt=None, response_schema=None):
     config = types.GenerateContentConfig(system_instruction=system_prompt)
