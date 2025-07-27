@@ -5,11 +5,10 @@
 import os
 
 from openai import OpenAI
-from dotenv import load_dotenv
 
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key=os.environ.get("OPENROUTER_API_KEY"),
+    api_key=os.getenv("OPENROUTER_API_KEY"),
 )
 
 DEEPSEEK_MODEL = "deepseek/deepseek-chat-v3-0324:free"
@@ -20,60 +19,50 @@ TNG_DEEPSEEK_MODEL = "tngtech/deepseek-r1t2-chimera:free"
 
 free_model_list = [DEEPSEEK_MODEL, QWEN_MODEL, MOONSHOT_MODEL, GOOGLE_GEMINI_MODEL, TNG_DEEPSEEK_MODEL]
 
-SYSTEM_PROMPT = "You are about to enter the LLM Battle Arena." \
-"Please choose a unique name for yourself and select one class from the following: Berserker, Rogue, Ranger, or Wizard." \
-"Respond in the following format: " \
-"Name: [Your Name]" \
-"Class: [Your Class]" \
-"Description: [A brief description of what you hope to achieve in the arena today]"
+def generate_response_with_fallback(prompt, system_prompt=None, response_schema=None, is_streamed=False):
+    models = free_model_list
+    response_func = generate_streamed_response if is_streamed else generate_response
 
-def send_message(prompt, role, model=None):
-    if not model:
-        model = free_model_list[0]
-    
-    completion = client.chat.completions.create(
+    for model in models:
+        try:
+            response = response_func(
+                prompt=prompt,
+                model=model,
+                system_prompt=system_prompt,
+                response_schema=response_schema,
+            )
+            return response
+        except Exception as e:
+            print(f"Model {model} failed: {e}")
+            continue
+    raise RuntimeError("All models failed to generate a response.")
+
+def generate_response(prompt, model, system_prompt=None, response_schema=None):
+    if response_schema:
+        return client.responses.parse(
+            model=model,
+            instructions=system_prompt,
+            input=prompt,
+            text_format=response_schema,
+        )
+    return client.responses.create(
         model=model,
-        messages=[
-            {
-                "role": role,
-                "content": prompt
-            }
-        ]
+        instructions=system_prompt,
+        input=prompt,
     )
 
-    return completion.choices[0].message.content
-
-
-if __name__ == "__main__":
-    load_dotenv()
-    prompt = SYSTEM_PROMPT
-
-    try:
-        reply = send_message(prompt=prompt, role="user", model=DEEPSEEK_MODEL)
-        print(f"Deepseek: {reply}")
-    except Exception as e:
-        print(f"Deepseek failed to respond: {e}")
-
-    try:
-        reply = send_message(prompt=prompt, role="user", model=QWEN_MODEL)
-        print(f"Qwen: {reply}")
-    except Exception as e:
-        print(f"Qwen failed to respond: {e}")
-
-    try:
-        reply = send_message(prompt=prompt, role="user", model=MOONSHOT_MODEL)
-        print(f"Moonshot: {reply}")
-    except Exception as e:
-        print(f"Moonshot failed to respond: {e}")
-
-    try:
-        reply = send_message(prompt=prompt, role="user", model=GOOGLE_GEMINI_MODEL)
-        print(f"Gemini: {reply}")
-    except Exception as e:
-        print(f"Gemini failed to respond: {e}")
-
-    try:
-        reply = send_message(prompt=prompt, role="user", model=TNG_DEEPSEEK_MODEL)
-        print(f"TNG Deepseek: {reply}")
-    except Exception as e:
-        print(f"TNG failed to respond: {e}")
+def generate_streamed_response(prompt, model, system_prompt=None, response_schema=None):
+    if response_schema:
+        return client.responses.parse(
+            model=model,
+            instructions=system_prompt,
+            input=prompt,
+            text_format=response_schema,
+            stream=True,
+        )
+    return client.responses.create(
+        model=model,
+        instructions=system_prompt,
+        input=prompt,
+        stream=True,
+    )
