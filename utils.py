@@ -4,7 +4,7 @@ from enum import Enum
 from rich import print
 from rich.text import Text
 
-DELAY_PER_WORD = 0.12 # default: 0.24, lowered for testing purposes
+DELAY_PER_WORD = 0.08 # default: 0.24 is average wpm for teenagers apparently, but feels too slow
 
 class ColorList(Enum):
     RED = "red"

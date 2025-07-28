@@ -10,8 +10,8 @@ from battle_round import BattleRound
 from battler_class import BattlerClass
 from llm_managers.gemini_manager import generate_response_with_fallback
 from models import ContestantSchema, RosterResponse, Battler, parse_roster_response
-from prompts import contestant_selection_prompt
-from utils import print_with_delay
+from prompts import contestant_selection_prompt, victory_system_prompt
+from utils import print_with_delay, staggered_print_with_delay
 
 def main() -> None:
     show_arena_introduction()
@@ -62,10 +62,30 @@ def battle_loop(roster: list[ContestantSchema]) -> None:
         round_number += 1
 
     if len(battle_round.active_battlers) == 1:
-        winner = battle_round.active_battlers[0]
-        print_with_delay(f"\n{winner.get_formatted_name_and_class()} [bold green]is the victor![/bold green]")
+        handle_victory_conditions(battle_round)
     else:
-        print_with_delay("\n[bold red]It... it's a draw!? How did this happen?[/bold red]")
+        print_with_delay("\n[bold red]It... it's a draw!? How did this happen? Someone call the janitor to clean up this mess![/bold red]")
+
+def handle_victory_conditions(battle_round: BattleRound):
+    victor_battler = battle_round.active_battlers[0]
+    history_context = "\n".join(battle_round.battle_history)
+    prompt = f"Battle History:\n{history_context}\n\nCongratulations on your victory! Give a victory speech to the crowd!"
+    other_battlers = [b.name_and_class for b in battle_round.active_battlers if b != victor_battler]
+
+    print_with_delay(f"\n[bold]{victor_battler.formatted_name_and_class} stands victorious![/bold]")
+
+    try:
+        response = generate_response_with_fallback(
+            prompt=prompt,
+            system_prompt=victory_system_prompt(victor_battler, other_battlers),
+        )
+
+        print_with_delay(f"{victor_battler.formatted_name}: ", end='')
+        staggered_print_with_delay(f"{response.text}")
+        sys.exit(0)
+    except Exception as e:
+        print(f"Error generating victory response: {e}")
+        sys.exit(2)
 
 if __name__ == "__main__":
     main()
