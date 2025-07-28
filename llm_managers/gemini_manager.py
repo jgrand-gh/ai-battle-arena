@@ -3,9 +3,7 @@ import os
 from google import genai
 from google.genai import types
 
-client = genai.Client(
-    api_key=os.getenv("GOOGLE_API_KEY"),
-)
+client = genai.Client() # gets the API key from GEMINI_API_KEY specified in .env file (GEMINI_API_KEY="your_api_key_here")
 
 def generate_response_with_fallback(prompt, system_prompt=None, response_schema=None, is_streamed=False):
     models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"]
