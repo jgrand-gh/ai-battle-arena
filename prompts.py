@@ -44,7 +44,7 @@ def battle_turn_system_prompt(battler: Battler, active_battlers: list[str]) -> s
         "More specifically, describe how the action connected with you and the damage you took from it. Be realistic, don't just act as though you can shrug off every attack.",
         "If the action was enough to defeat, incapacitate or otherwise restrict your actions, do not provide a subsequent action or target.",
         "- the amount of damage taken from the last action, if applicable. Physical, mental, emotional and psychic damage are all valid forms of damage.",
-        "If this reduces your current health to 0 or below, then you have been defeated.",
+        "Everything will reduce your health, at least a little. If this reduces your current health to 0 or below, then you have been defeated.",
         "- an action you are taking, and the target with which you'd like to take the action at",
         "- a brief description of the action, described as though it is 'in-motion'",
         "The target will respond accordingly as to how the attack connects with them.",
@@ -55,4 +55,16 @@ def battle_turn_system_prompt(battler: Battler, active_battlers: list[str]) -> s
         "",
         "Consider your character's personality and current situation when choosing your action.",
         "You will be provided with a message history describing the events of the battle so far. Use this context to inform your next action.",
+    ])
+
+def victory_system_prompt(battler: Battler, other_battlers: list[str]) -> str:
+    return "\n".join([
+        f"You are {battler.first_name} {battler.last_name} the {battler.battler_class.value}, and you are the victor of the AI Battle Arena.",
+        f"You are: {battler.description}",
+        f"You have defeated all the other battlers: {', '.join(other_battlers)}.",
+        "Reflect on your journey and the battles you fought to achieve this victory.",
+        "Consider what this victory means for you and your future in the arena.",
+        "Feel free to share any final thoughts or reflections on your experience.",
+        "Keep your response around or below 200 words.",
+        "The provided prompt will show the history of the final actions in the battle that led to your victory.",
     ])

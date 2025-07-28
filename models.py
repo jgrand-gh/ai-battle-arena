@@ -15,13 +15,16 @@ class ContestantSchema(BaseModel):
     intro_taunt: str
     text_color: ColorList
 
-    def get_formatted_name(self) -> str:
+    @property
+    def formatted_name(self) -> str:
         return f"[bold {self.text_color.value}]{self.first_name}[/bold {self.text_color.value}]"
 
-    def get_name_and_class(self) -> str:
+    @property
+    def name_and_class(self) -> str:
         return f"{self.first_name} ({self.battler_class.value})"
 
-    def get_formatted_name_and_class(self) -> str:
+    @property
+    def formatted_name_and_class(self) -> str:
         return f"[bold][{self.text_color.value}]{self.first_name}[/bold] ({self.battler_class.value})[/{self.text_color.value}]"
 
     def introduce(self):
@@ -31,7 +34,7 @@ class ContestantSchema(BaseModel):
             f"the [italic]{self.battler_class.value}[/italic][/{self.text_color.value}]! "
             f"{self.description}"
         )
-        print_with_delay(f"{self.get_formatted_name()}: ", end='')
+        print_with_delay(f"{self.formatted_name}: ", end='')
         staggered_print_with_delay(f"{self.intro_taunt}")
 
 class Battler(ContestantSchema):
@@ -40,6 +43,11 @@ class Battler(ContestantSchema):
     is_defeated: bool = False
     can_use_special: bool = True
     ongoing_status_conditions: list[str] = []
+
+    @property
+    def health_values(self) -> str:
+        # returns in this format: "80 / 100"
+        return f"{self.current_health} / {self.MAX_HP}"
 
     def get_formatted_name_and_health(self) -> str:
         # returns in this format: "name (HP: [green]80[/green] / 100)"
@@ -56,11 +64,7 @@ class Battler(ContestantSchema):
         else:
             health_color = ColorList.RED.value
 
-        return f"{self.get_formatted_name()} (HP: [{health_color}]{self.current_health}[/{health_color}] / {self.MAX_HP})"
-    
-    def get_health_values(self) -> str:
-        # returns in this format: "80 / 100"
-        return f"{self.current_health} / {self.MAX_HP}"
+        return f"{self.formatted_name} (HP: [{health_color}]{self.current_health}[/{health_color}] / {self.MAX_HP})"
 
     def take_damage(self, damage: int) -> None:
         self.current_health = max(0, self.current_health - damage)
