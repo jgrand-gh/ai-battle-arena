@@ -2,14 +2,24 @@
 
 AI Battle Arena is a Python-based simulation platform where AI contestants, powered by large language models (LLMs), compete in a turn-based battle environment. The project is designed for experimentation with prompt engineering, LLM strategies, and interactive AI competitions.
 
+This project was designed with the inherent goal of letting the LLMs dictate the flow of combat. As a result, this often leads to scenarios where the AI contestants will 100% break the rules and defy all odds, but hey, that's technically what they're allowed to do.
+
+This project is a submission to the [Boot.dev](https://boot.dev) 2025 Hackathon.
+
+> **Note:** The original plan was to leverage OpenRouter's interface to have each AI contestant controlled by a separate LLM, but as the scope of this project was within a hackathon, it was easier (and free) to use Google Gemini for all of the contestants instead.
+
 ## Features
 
 - Run simulated battles between AI contestants using Google Gemini
-- Modular contestant system for easy addition of new AI agents
-- Configurable battle rounds and rules
+- 13 unique character classes with distinct abilities and special moves
+- Dynamic status condition system (poisoned, confused, stunned, immobile, etc.)
+- Rich console output with colored text and realistic timing effects
+- Turn-based combat with reaction and action phases
+- AI-generated victory speeches and character introductions
+- Configurable battle rounds with comprehensive battle history tracking
 - Command-line interface for running and observing battles
 
-> **Note:** The OpenRouter LLM interface is currently defunct and should not be used.
+> **Note:** The OpenRouter LLM interface is currently defunct (and untested) and should not be used.
 
 ## Requirements
 
@@ -39,19 +49,26 @@ AI Battle Arena is a Python-based simulation platform where AI contestants, powe
    python main.py
    ```
 
+> **Tip:** You can adjust the text output speed by modifying the `DELAY_PER_WORD` constant in `utils.py`. Lower values make text appear faster, higher values slower.
+
 ## Project Structure
 
 - `main.py` — Entry point, runs the battle arena simulation
-- `llm_managers/` — LLM interaction managers (e.g., `gemini_manager.py`)
+- `llm_managers/` — LLM interaction managers
+  - `gemini_manager.py` — Google Gemini API integration
+  - `openrouter_manager.py` — OpenRouter API (deprecated)
 - `models.py` — Contestant and battler models, response schemas, and parsing logic
 - `battler_class.py` — Enum and logic for battler classes, descriptions, and actions
-- `roster.py` — Roster creation and contestant management
 - `battle_round.py` — Handles the logic for each round of the battle
+- `status_condition.py` — Status condition system and effects
 - `prompts.py` — Contains prompt templates for LLMs
 - `utils.py` — Utility functions for printing and formatting
 - `requirements.txt` — Python dependencies
 - `.env` — API keys and configuration (not committed)
 
-## License
+## How It Works
 
-This project is a submission to the Boot.dev 2025 Hackathon.
+1. **Roster Creation**: The system randomly selects 4 character classes and uses AI to generate unique contestants with names, descriptions, and personalities.
+2. **Battle Simulation**: Contestants take turns using their class-specific abilities, with AI determining their actions and reactions based on battle context and character personalities.
+3. **Status Effects**: Battlers can be affected by various conditions like poisoned, confused, or stunned, adding strategic depth.
+4. **Victory**: The last battler standing gives an AI-generated victory speech.
